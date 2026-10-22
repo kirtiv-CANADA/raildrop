@@ -3,7 +3,7 @@
 // ---------- Helpers ----------
 export function addMinutes(hhmm, mins) {
   const [h, m] = hhmm.split(':').map(Number);
-  const total = (h * 60 + m + mins) % (24 * 60);
+  const total = (((h * 60 + m + mins) % 1440) + 1440) % 1440;
   const hh = String(Math.floor(total / 60)).padStart(2, '0');
   const mm = String(total % 60).padStart(2, '0');
   return `${hh}:${mm}`;
@@ -23,7 +23,7 @@ export function formatDelay(mins) {
   return `${h ? h + ' hr ' : ''}${m ? m + ' min' : ''}`.trim() + ' late';
 }
 
-// ---------- Trains ----------
+// ---------- Trains (sample timetables) ----------
 export const TRAINS = {
   '12961': {
     number: '12961',
@@ -50,11 +50,39 @@ export const TRAINS = {
       { code: 'CSMT', name: 'Mumbai CSMT', arrival: '20:45', haltMins: 0 },
     ],
   },
+  '11058': {
+    number: '11058',
+    name: 'Amritsar - Mumbai Express (sample)',
+    stops: [
+      { code: 'NDLS', name: 'New Delhi', arrival: '20:25', haltMins: 5 },
+      { code: 'NZM', name: 'Hazrat Nizamuddin', arrival: '20:51', haltMins: 2 },
+      { code: 'MTJ', name: 'Mathura Jn', arrival: '22:50', haltMins: 1 },
+      { code: 'AGC', name: 'Agra Cantt', arrival: '23:45', haltMins: 5 },
+      { code: 'GWL', name: 'Gwalior Jn', arrival: '01:15', haltMins: 3 },
+      { code: 'BPL', name: 'Bhopal Jn', arrival: '05:40', haltMins: 10 },
+      { code: 'BHS', name: 'Vidisha', arrival: '08:20', haltMins: 2 },
+    ],
+  },
 };
 
-// ---------- PNR test data (any of these will work in the demo) ----------
+// ---------- PNR test data ----------
 // currentDelayMins = how late the train is when the passenger opens the app.
+// nowTime = the demo clock (what time it is for the passenger).
 export const PNRS = {
+  '7305148296': {
+    pnr: '7305148296',
+    trainNumber: '11058',
+    passenger: 'Kirti Sharma',
+    phone: '9876543210',
+    coach: 'S2',
+    seat: 41,
+    berth: 'Lower',
+    boardingCode: 'NDLS',
+    destinationCode: 'BHS',
+    currentDelayMins: 63,
+    nowTime: '20:30',
+    note: 'Waiting at New Delhi, train 1 hr 3 min late (main demo)',
+  },
   '4521879630': {
     pnr: '4521879630',
     trainNumber: '12961',
@@ -66,6 +94,7 @@ export const PNRS = {
     boardingCode: 'INDB',
     destinationCode: 'NZM',
     currentDelayMins: 120,
+    nowTime: '17:30',
     note: 'Heavy delay: 2 hours late',
   },
   '2837461950': {
@@ -79,6 +108,7 @@ export const PNRS = {
     boardingCode: 'UJN',
     destinationCode: 'AGC',
     currentDelayMins: 35,
+    nowTime: '18:15',
     note: 'Small delay: 35 min late',
   },
   '6104928375': {
@@ -92,6 +122,7 @@ export const PNRS = {
     boardingCode: 'BPL',
     destinationCode: 'CSMT',
     currentDelayMins: 0,
+    nowTime: '08:00',
     note: 'Train is on time',
   },
 };
@@ -102,8 +133,10 @@ export function getJourneyByPnr(pnr) {
   const train = TRAINS[booking.trainNumber];
   const startIdx = train.stops.findIndex((s) => s.code === booking.boardingCode);
   const endIdx = train.stops.findIndex((s) => s.code === booking.destinationCode);
-  // Only stops after boarding and before the destination are valid for delivery.
-  const deliverableStops = train.stops.slice(startIdx + 1, endIdx + 1).filter((s) => s.haltMins > 0);
+  // The boarding station is included because the train has not reached it yet.
+  const deliverableStops = train.stops
+    .slice(startIdx, endIdx + 1)
+    .filter((s) => s.haltMins > 0 || s.code === booking.boardingCode);
   return { booking, train, deliverableStops };
 }
 
@@ -115,6 +148,7 @@ export const CATALOG = {
   rajma: { id: 'rajma', name: 'Rajma Chawal', category: 'Meals', veg: true, price: 125, desc: 'Home-style rajma with steamed rice' },
   chholebhature: { id: 'chholebhature', name: 'Chole Bhature', category: 'Meals', veg: true, price: 130, desc: '2 bhature with spicy chole' },
   paneerbutter: { id: 'paneerbutter', name: 'Paneer Butter Masala + 3 Roti', category: 'Meals', veg: true, price: 190, desc: 'Creamy paneer gravy with butter roti' },
+  aloopratha: { id: 'aloopratha', name: 'Aloo Paratha (2 pcs)', category: 'Meals', veg: true, price: 90, desc: 'With curd and pickle' },
   vegbiryani: { id: 'vegbiryani', name: 'Veg Biryani', category: 'Biryani', veg: true, price: 170, desc: 'With raita' },
   chickenbiryani: { id: 'chickenbiryani', name: 'Chicken Biryani', category: 'Biryani', veg: false, price: 220, desc: '2 pieces, with raita' },
   eggbiryani: { id: 'eggbiryani', name: 'Egg Biryani', category: 'Biryani', veg: false, price: 160, desc: '2 eggs, with raita' },
@@ -133,7 +167,7 @@ export const CATALOG = {
   gulabjamun: { id: 'gulabjamun', name: 'Gulab Jamun (2 pcs)', category: 'Desserts', veg: true, price: 50, desc: 'Served warm' },
 };
 
-// ---------- Restaurants by station ----------
+// ---------- Restaurants by station (all names are made up) ----------
 export const RESTAURANTS = [
   { id: 'r1', station: 'UJN', name: 'Mahakal Bhojnalay', cuisine: 'North Indian, Thali', rating: 4.3, ratingCount: 1240, vegOnly: true, prepMins: 20, priceFactor: 1.0, items: ['thali', 'minithali', 'dalrice', 'kachori', 'samosa', 'poha', 'chai', 'lassi', 'water', 'gulabjamun'] },
   { id: 'r2', station: 'UJN', name: 'Station Snack Point', cuisine: 'Snacks, Fast Food', rating: 4.0, ratingCount: 610, vegOnly: false, prepMins: 15, priceFactor: 0.95, items: ['vegburger', 'chickenburger', 'sandwich', 'samosa', 'kachori', 'chai', 'coffee', 'water'] },
@@ -153,7 +187,33 @@ export const RESTAURANTS = [
   { id: 'r11', station: 'ET', name: 'Itarsi Bhojan Sagar', cuisine: 'North Indian, Thali', rating: 4.0, ratingCount: 520, vegOnly: true, prepMins: 20, priceFactor: 0.95, items: ['thali', 'minithali', 'dalrice', 'poha', 'samosa', 'chai', 'water'] },
   { id: 'r12', station: 'BSL', name: 'Bhusaval Kitchen', cuisine: 'Maharashtrian, North Indian', rating: 4.2, ratingCount: 870, vegOnly: false, prepMins: 20, priceFactor: 1.0, items: ['thali', 'dalrice', 'vegbiryani', 'chickenbiryani', 'vegburger', 'chai', 'lassi'] },
   { id: 'r13', station: 'NK', name: 'Nashik Misal House', cuisine: 'Maharashtrian, Snacks', rating: 4.4, ratingCount: 1500, vegOnly: true, prepMins: 15, priceFactor: 1.0, items: ['minithali', 'poha', 'samosa', 'sandwich', 'chai', 'coffee', 'lassi', 'water'] },
+
+  { id: 'r14', station: 'INDB', name: 'Chaat Bazaar Corner', cuisine: 'Snacks, Chaat', rating: 4.2, ratingCount: 930, vegOnly: true, prepMins: 15, priceFactor: 0.95, items: ['samosa', 'kachori', 'poha', 'sandwich', 'chai', 'coffee', 'water'] },
+  { id: 'r15', station: 'INDB', name: 'Indore Express Meals', cuisine: 'North Indian, Thali', rating: 4.1, ratingCount: 1100, vegOnly: false, prepMins: 25, priceFactor: 1.0, items: ['thali', 'dalrice', 'paneerbutter', 'butterchicken', 'vegbiryani', 'chai', 'lassi', 'water'] },
+
+  { id: 'r16', station: 'NDLS', name: 'Dilli Rasoi Kitchen', cuisine: 'North Indian, Punjabi', rating: 4.5, ratingCount: 2210, vegOnly: false, prepMins: 20, priceFactor: 1.1, items: ['thali', 'dalrice', 'rajma', 'chholebhature', 'paneerbutter', 'butterchicken', 'chickenbiryani', 'chai', 'lassi', 'water'] },
+  { id: 'r17', station: 'NDLS', name: 'Paratha Gali House', cuisine: 'Parathas, Snacks', rating: 4.3, ratingCount: 1640, vegOnly: true, prepMins: 15, priceFactor: 1.05, items: ['aloopratha', 'chholebhature', 'rajma', 'samosa', 'kachori', 'chai', 'coffee', 'lassi', 'water'] },
+  { id: 'r18', station: 'NDLS', name: 'Platform Grill Express', cuisine: 'Burgers, Wraps', rating: 4.0, ratingCount: 720, vegOnly: false, prepMins: 15, priceFactor: 1.1, items: ['chickenburger', 'vegburger', 'paneerwrap', 'sandwich', 'chai', 'coffee', 'water'] },
+
+  { id: 'r19', station: 'NZM', name: 'Nizamuddin Biryani Point', cuisine: 'Biryani, Mughlai', rating: 4.2, ratingCount: 1390, vegOnly: false, prepMins: 25, priceFactor: 1.05, items: ['chickenbiryani', 'eggbiryani', 'vegbiryani', 'butterchicken', 'chai', 'water'] },
+
+  { id: 'r20', station: 'MTJ', name: 'Mathura Peda & Meals', cuisine: 'Thali, Sweets', rating: 4.3, ratingCount: 1560, vegOnly: true, prepMins: 20, priceFactor: 1.0, items: ['thali', 'minithali', 'rajma', 'samosa', 'kachori', 'chai', 'lassi', 'gulabjamun', 'water'] },
+  { id: 'r21', station: 'MTJ', name: 'Braj Rasoi 24x7', cuisine: 'North Indian, Snacks', rating: 4.0, ratingCount: 680, vegOnly: true, prepMins: 15, priceFactor: 0.95, items: ['minithali', 'dalrice', 'samosa', 'kachori', 'sandwich', 'chai', 'coffee', 'water'] },
+
+  { id: 'r22', station: 'BHS', name: 'Vidisha Station Kitchen', cuisine: 'North Indian, Snacks', rating: 4.1, ratingCount: 340, vegOnly: true, prepMins: 20, priceFactor: 0.95, items: ['thali', 'dalrice', 'poha', 'samosa', 'chai', 'water'] },
 ];
+
+// Opening hours [open, close]. A close time earlier than the open time means it closes after midnight.
+export const RESTAURANT_HOURS = {
+  r1: ['06:00', '22:30'], r2: ['07:00', '23:00'], r3: ['11:00', '01:00'],
+  r4: ['08:00', '22:00'], r5: ['07:00', '23:30'], r6: ['00:00', '23:59'],
+  r7: ['06:00', '21:00'], r8: ['09:00', '02:00'], r9: ['07:00', '23:00'],
+  r10: ['11:00', '03:00'], r11: ['06:00', '22:00'], r12: ['07:00', '23:00'],
+  r13: ['06:00', '22:00'], r14: ['10:00', '19:30'], r15: ['09:00', '23:00'],
+  r16: ['09:00', '21:45'], r17: ['06:00', '23:30'], r18: ['08:00', '23:00'],
+  r19: ['11:00', '01:00'], r20: ['06:00', '23:00'], r21: ['00:00', '23:59'],
+  r22: ['06:00', '22:00'],
+};
 
 export function restaurantsAt(stationCode) {
   return RESTAURANTS.filter((r) => r.station === stationCode);

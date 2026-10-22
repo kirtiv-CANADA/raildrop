@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { addMinutes, formatTime, formatDelay } from '../data';
 
 export default function Journey({ journey, delayMins, onBack, onContinue }) {
@@ -8,19 +7,7 @@ export default function Journey({ journey, delayMins, onBack, onContinue }) {
   const endIdx = train.stops.findIndex((s) => s.code === booking.destinationCode);
   const stops = train.stops.slice(startIdx, endIdx + 1);
   const isLate = delayMins > 0;
-
-  // Current Location Logic (Assuming train is heading to the next station)
-  const currentStation = stops[0];
-  const nextStation = stops[1] || stops[0];
-
-  // Live Current Time logic
-  const [currentTime, setCurrentTime] = useState(new Date());
-  useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 60000); // updates every minute
-    return () => clearInterval(timer);
-  }, []);
-
-  const formattedCurrentTime = currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const boardingStop = stops[0];
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center px-4 py-6">
@@ -38,7 +25,7 @@ export default function Journey({ journey, delayMins, onBack, onContinue }) {
           </p>
         </div>
 
-        {/* Train status & Live Clock */}
+        {/* Train status */}
         <div className="bg-white rounded-2xl shadow border border-gray-100 p-5 mt-4">
           <div className="flex justify-between items-start">
             <div>
@@ -54,52 +41,35 @@ export default function Journey({ journey, delayMins, onBack, onContinue }) {
             </span>
           </div>
 
-          <div className="flex items-center gap-2 mt-3 text-xs text-gray-500">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-            </span>
-            Live Running Status • Current Time: <span className="font-semibold text-gray-700">{formattedCurrentTime}</span>
-          </div>
+          <p className="mt-3 text-xs text-gray-500">
+            Demo time: <span className="font-semibold text-gray-700">{formatTime(booking.nowTime)}</span>
+          </p>
 
           {isLate && (
             <div className="bg-orange-50 border border-orange-100 rounded-lg p-3 mt-4">
               <p className="text-sm font-semibold text-[#FC8019]">Delivery window will adjust</p>
               <p className="text-sm text-gray-700 mt-1">
-                Your train is running late, so we use the new arrival time (ETA) for every order. Your order will not be cancelled.
+                We use the live arrival time (ETA) to adjust your order window.
               </p>
             </div>
           )}
         </div>
 
-        {/* Live Train Location & Progress */}
+        {/* Where is the train */}
         <div className="bg-white rounded-2xl shadow border border-gray-100 p-5 mt-4">
-          
           <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-5 flex items-start gap-3">
-            <div className="text-2xl animate-bounce mt-1">🚂</div>
+            <div className="text-2xl mt-1">🚂</div>
             <div>
-              <p className="text-sm font-bold text-[#FC8019]">Train is currently running</p>
+              <p className="text-sm font-bold text-[#FC8019]">
+                Train has not reached {boardingStop.name} yet
+              </p>
               <p className="text-xs text-gray-700 mt-1">
-                Departed <strong>{currentStation.name}</strong> and heading towards <strong>{nextStation.name}</strong>.
+                Expected at <strong>{formatTime(addMinutes(boardingStop.arrival, delayMins))}</strong>
+                {isLate && <> instead of {formatTime(boardingStop.arrival)}</>}.
               </p>
             </div>
           </div>
 
-          {/* Progress Bar */}
-          <div className="flex items-center justify-between text-[10px] text-gray-500 mb-1 font-semibold">
-            <span>{currentStation.name}</span>
-            <span>{nextStation.name}</span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2 mb-6 relative">
-            <div className="bg-[#FC8019] h-2 rounded-full" style={{ width: '45%' }}></div>
-            <div className="absolute top-1/2 -translate-y-1/2 transform -translate-x-1/2" style={{ left: '45%' }}>
-              <div className="bg-white border-2 border-[#FC8019] rounded-full p-1 shadow-md text-[10px]">
-                🚂
-              </div>
-            </div>
-          </div>
-
-          {/* Route Stops */}
           <div className="flex justify-between items-center mb-4">
             <p className="font-bold text-gray-800">Your route</p>
             <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Scheduled / ETA</p>
@@ -108,7 +78,7 @@ export default function Journey({ journey, delayMins, onBack, onContinue }) {
           {stops.map((stop, i) => {
             const isFirst = i === 0;
             const isLast = i === stops.length - 1;
-            const canOrder = !isFirst && stop.haltMins > 0;
+            const canOrder = isFirst || stop.haltMins > 0;
             const newTime = addMinutes(stop.arrival, delayMins);
 
             return (
@@ -123,18 +93,14 @@ export default function Journey({ journey, delayMins, onBack, onContinue }) {
                     <div>
                       <p className="font-semibold text-gray-800">{stop.name}</p>
                       <p className="text-xs text-gray-500">
-                        {isFirst
-                          ? 'Your boarding station'
-                          : isLast
-                          ? 'Your destination'
-                          : `Stops for ${stop.haltMins} min`}
+                        {isFirst ? 'Your boarding station' : isLast ? 'Your destination' : `Stops for ${stop.haltMins} min`}
                       </p>
                     </div>
 
                     <div className="text-right">
-                      <p className="text-[11px] text-gray-400 line-through">
-                        {formatTime(stop.arrival)}
-                      </p>
+                      {isLate && (
+                        <p className="text-[11px] text-gray-400 line-through">{formatTime(stop.arrival)}</p>
+                      )}
                       <p className={`text-sm font-bold ${isLate ? 'text-red-500' : 'text-green-600'}`}>
                         {formatTime(newTime)}
                       </p>
@@ -153,9 +119,7 @@ export default function Journey({ journey, delayMins, onBack, onContinue }) {
         </div>
 
         {deliverableStops.length === 0 ? (
-          <p className="text-sm text-gray-500 text-center mt-6">
-            No delivery stations are available on this journey.
-          </p>
+          <p className="text-sm text-gray-500 text-center mt-6">No delivery stations are available on this journey.</p>
         ) : (
           <button
             onClick={onContinue}
