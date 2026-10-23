@@ -25,6 +25,19 @@ export function formatDelay(mins) {
 
 // ---------- Trains (sample timetables) ----------
 export const TRAINS = {
+  '11058': {
+    number: '11058',
+    name: 'Amritsar - Mumbai Express (sample)',
+    stops: [
+      { code: 'NDLS', name: 'New Delhi', arrival: '20:25', haltMins: 5 },
+      { code: 'NZM', name: 'Hazrat Nizamuddin', arrival: '20:51', haltMins: 2 },
+      { code: 'MTJ', name: 'Mathura Jn', arrival: '22:50', haltMins: 1 },
+      { code: 'AGC', name: 'Agra Cantt', arrival: '23:45', haltMins: 5 },
+      { code: 'GWL', name: 'Gwalior Jn', arrival: '01:15', haltMins: 3 },
+      { code: 'BPL', name: 'Bhopal Jn', arrival: '05:40', haltMins: 10 },
+      { code: 'BHS', name: 'Vidisha', arrival: '08:20', haltMins: 2 },
+    ],
+  },
   '12961': {
     number: '12961',
     name: 'Indore - Delhi Express (sample)',
@@ -50,24 +63,12 @@ export const TRAINS = {
       { code: 'CSMT', name: 'Mumbai CSMT', arrival: '20:45', haltMins: 0 },
     ],
   },
-  '11058': {
-    number: '11058',
-    name: 'Amritsar - Mumbai Express (sample)',
-    stops: [
-      { code: 'NDLS', name: 'New Delhi', arrival: '20:25', haltMins: 5 },
-      { code: 'NZM', name: 'Hazrat Nizamuddin', arrival: '20:51', haltMins: 2 },
-      { code: 'MTJ', name: 'Mathura Jn', arrival: '22:50', haltMins: 1 },
-      { code: 'AGC', name: 'Agra Cantt', arrival: '23:45', haltMins: 5 },
-      { code: 'GWL', name: 'Gwalior Jn', arrival: '01:15', haltMins: 3 },
-      { code: 'BPL', name: 'Bhopal Jn', arrival: '05:40', haltMins: 10 },
-      { code: 'BHS', name: 'Vidisha', arrival: '08:20', haltMins: 2 },
-    ],
-  },
 };
 
-// ---------- PNR test data ----------
+// ---------- Demo bookings ----------
 // currentDelayMins = how late the train is when the passenger opens the app.
 // nowTime = the demo clock (what time it is for the passenger).
+// Keep the main demo first: the list on the Home screen follows this order.
 export const PNRS = {
   '7305148296': {
     pnr: '7305148296',
@@ -80,14 +81,15 @@ export const PNRS = {
     boardingCode: 'NDLS',
     destinationCode: 'BHS',
     currentDelayMins: 63,
-    nowTime: '20:30',
-    note: 'Waiting at New Delhi, train 1 hr 3 min late (main demo)',
+    nowTime: '20:00',
+    title: 'Main demo',
+    note: 'Waiting at New Delhi, train 1 hr 3 min late',
   },
   '4521879630': {
     pnr: '4521879630',
     trainNumber: '12961',
-    passenger: 'Kirti Sharma',
-    phone: '9876543210',
+    passenger: 'Amit Kulkarni',
+    phone: '9812345670',
     coach: 'B2',
     seat: 34,
     berth: 'Lower',
@@ -95,21 +97,8 @@ export const PNRS = {
     destinationCode: 'NZM',
     currentDelayMins: 120,
     nowTime: '17:30',
-    note: 'Heavy delay: 2 hours late',
-  },
-  '2837461950': {
-    pnr: '2837461950',
-    trainNumber: '12961',
-    passenger: 'Rohit Verma',
-    phone: '9812345670',
-    coach: 'S5',
-    seat: 61,
-    berth: 'Side Upper',
-    boardingCode: 'UJN',
-    destinationCode: 'AGC',
-    currentDelayMins: 35,
-    nowTime: '18:15',
-    note: 'Small delay: 35 min late',
+    title: 'Long delay',
+    note: 'Waiting at Indore, train 2 hr late',
   },
   '6104928375': {
     pnr: '6104928375',
@@ -123,7 +112,8 @@ export const PNRS = {
     destinationCode: 'CSMT',
     currentDelayMins: 0,
     nowTime: '08:00',
-    note: 'Train is on time',
+    title: 'On time',
+    note: 'Waiting at Bhopal, train on time',
   },
 };
 
@@ -210,7 +200,7 @@ export const RESTAURANT_HOURS = {
   r7: ['06:00', '21:00'], r8: ['09:00', '02:00'], r9: ['07:00', '23:00'],
   r10: ['11:00', '03:00'], r11: ['06:00', '22:00'], r12: ['07:00', '23:00'],
   r13: ['06:00', '22:00'], r14: ['10:00', '19:30'], r15: ['09:00', '23:00'],
-  r16: ['09:00', '21:45'], r17: ['06:00', '23:30'], r18: ['08:00', '23:00'],
+  r16: ['09:00', '22:30'], r17: ['06:00', '23:30'], r18: ['08:00', '22:00'],
   r19: ['11:00', '01:00'], r20: ['06:00', '23:00'], r21: ['00:00', '23:59'],
   r22: ['06:00', '22:00'],
 };

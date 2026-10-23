@@ -3,7 +3,7 @@ export default function BeforeAfter({ onBack }) {
     'A restaurant shows "Order by 9:08 PM", then the page says "No items available right now".',
     'A station says "No restaurants serving here" and offers only a "Next station" button.',
     '"No stations available. We do not have enough time left to deliver at any serviceable station."',
-    'A station card promises many restaurants, but the list shows only one.',
+    'A station card promises many restaurants, but the list that opens shows only one.',
   ];
   const withRailDrop = [
     'The order-by time is recalculated from the live arrival estimate.',
@@ -28,7 +28,7 @@ export default function BeforeAfter({ onBack }) {
 
         <div className="bg-white border border-gray-200 rounded-2xl p-5 mb-4">
           <p className="font-bold text-gray-800 mb-1">Today</p>
-          <p className="text-xs text-gray-500 mb-3">Messages seen while checking a delayed train at New Delhi.</p>
+          <p className="text-xs text-gray-500 mb-3">Messages seen on existing railway food apps while checking a delayed train at New Delhi.</p>
           <ul className="space-y-2 text-sm text-gray-700 list-disc pl-5">
             {today.map((t) => (
               <li key={t}>{t}</li>

@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import { getJourneyByPnr, PNRS } from '../data';
 
-export default function Home({ onFound }) {
+export default function Home({ onFound, onCompare }) {
   const [pnr, setPnr] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  // Naya state testing list ko chhupane ke liye
   const [showDemo, setShowDemo] = useState(false);
 
   const handleSubmit = (e) => {
@@ -24,7 +23,7 @@ export default function Home({ onFound }) {
       setLoading(false);
 
       if (!journey) {
-        setError("We couldn't find a booking for this PNR. Try one of the sample PNRs below.");
+        setError("We couldn't find a booking for this PNR. Try one of the demo bookings below.");
         return;
       }
       onFound(journey);
@@ -59,11 +58,10 @@ export default function Home({ onFound }) {
               loading ? 'bg-gray-400' : 'bg-[#FC8019] hover:bg-orange-600'
             }`}
           >
-            {loading ? 'Fetching live train status...' : 'Find my train'}
+            {loading ? 'Fetching train status...' : 'Find my train'}
           </button>
         </form>
 
-        {/* Naya Code: Demo PNRs chhupane ke liye */}
         <div className="mt-6">
           <button
             type="button"
@@ -85,7 +83,9 @@ export default function Home({ onFound }) {
                   }}
                   className="w-full text-left bg-white border border-gray-200 rounded-lg px-4 py-3 hover:border-[#FC8019] transition-all"
                 >
-                  <p className="text-sm font-semibold text-gray-800">{b.pnr}</p>
+                  <p className="text-sm font-semibold text-gray-800">
+                    {b.title}: {b.pnr}
+                  </p>
                   <p className="text-xs text-gray-500">
                     {b.passenger} · {b.note}
                   </p>
@@ -95,8 +95,16 @@ export default function Home({ onFound }) {
           )}
         </div>
 
-        <p className="text-xs text-gray-400 text-center mt-8">
-          Concept prototype with sample data. Not affiliated with any food delivery company.
+        <button
+          type="button"
+          onClick={onCompare}
+          className="block mx-auto mt-6 text-sm font-medium text-gray-600 underline hover:text-[#FC8019]"
+        >
+          How is this different from ordering today?
+        </button>
+
+        <p className="text-xs text-gray-400 text-center mt-6">
+          Concept prototype with sample data. Not affiliated with any railway or food delivery company.
         </p>
       </div>
     </div>

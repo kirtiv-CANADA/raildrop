@@ -32,7 +32,7 @@ export default function Restaurants({ station, journey, delayMins, onSelectResta
           Your train arrives at <strong>{formatTime(eta)}</strong>
           {delayMins > 0 && <span className="text-red-500"> (late)</span>}. Food is handed over at your seat.
         </p>
-        <p className="text-xs text-gray-500 mb-6">{openCount} of {rows.length} restaurants can deliver.</p>
+        <p className="text-xs text-gray-500 mb-6">{openCount} of {rows.length} can deliver.</p>
 
         <div className="space-y-4">
           {rows.map(({ restaurant, info }) => {

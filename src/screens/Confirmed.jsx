@@ -13,7 +13,7 @@ export default function Confirmed({ order, customer, paymentMethod, onTrack, onD
 
         <h2 className="text-2xl font-bold text-gray-800 text-center">Order confirmed</h2>
         <p className="text-gray-500 text-sm text-center mt-1">
-          Order {order.id} · Paid ₹{order.bill.total} via {paymentMethod}
+          Order {order.id} · ₹{order.bill.total} · {paymentMethod}
         </p>
 
         <div className="bg-gray-50 rounded-xl p-4 mt-6 border border-gray-100 text-sm">

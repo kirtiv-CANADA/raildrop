@@ -17,7 +17,7 @@ export default function Tracking({ order, customer, delayMins, onChangeStation, 
 
   const eta = getEta(station, delayMins);
   const placedEta = getEta(station, order.placedDelayMins);
-  const halt = station.haltMins > 0 ? station.haltMins : 10; // boarding station: train starts here
+  const halt = station.haltMins > 0 ? station.haltMins : 10; // boarding station: the train starts here
   const windowEnd = addMinutes(eta, halt);
   const cookStart = getCookStart(eta, restaurant);
   const placedCookStart = getCookStart(placedEta, restaurant);
@@ -116,7 +116,9 @@ export default function Tracking({ order, customer, delayMins, onChangeStation, 
 
         {delivered && (
           <div className="bg-green-50 border border-green-200 rounded-xl p-4 mt-4 text-center">
-            <p className="font-semibold text-green-700">Delivered to Coach {order.coach}, Seat {order.seat}</p>
+            <p className="font-semibold text-green-700">
+              Delivered to Coach {order.coach}, Seat {order.seat}
+            </p>
             <p className="text-xs text-green-600 mt-1">OTP and name verified (simulated).</p>
           </div>
         )}

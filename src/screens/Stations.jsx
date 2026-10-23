@@ -37,6 +37,15 @@ export default function Stations({ journey, delayMins, onSelectStation, onBack }
           </div>
         )}
 
+        {!firstUsable && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+            <p className="text-sm font-semibold text-red-600">No station can deliver right now</p>
+            <p className="text-sm text-gray-700 mt-1">
+              With the current arrival times, every restaurant on your route is closed or past its order cutoff.
+            </p>
+          </div>
+        )}
+
         <div className="space-y-4">
           {rows.map(({ stop, total, openCount, eta }) => {
             const usable = openCount > 0;
@@ -73,13 +82,13 @@ export default function Stations({ journey, delayMins, onSelectStation, onBack }
 
                 {usable ? (
                   <span className="inline-block mt-3 text-xs font-semibold text-[#FC8019] bg-orange-50 px-3 py-1 rounded-full">
-                    {openCount} of {total} restaurants can deliver · View
+                    {openCount} of {total} {total === 1 ? 'restaurant' : 'restaurants'} can deliver · View
                   </span>
                 ) : (
                   <p className="mt-3 text-sm text-gray-600">
                     {total === 0
                       ? 'No restaurants serve this station.'
-                      : `All ${total} restaurants are closed or past their order cutoff at ${formatTime(eta)}.`}
+                      : `All ${total} ${total === 1 ? 'restaurant is' : 'restaurants are'} closed or past the order cutoff at ${formatTime(eta)}.`}
                   </p>
                 )}
               </div>
