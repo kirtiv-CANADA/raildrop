@@ -9,7 +9,19 @@ export function addMinutes(hhmm, mins) {
   return `${hh}:${mm}`;
 }
 
-export function formatTime(hhmm) {
+// The demo scenario is written in "scenario time". When a booking is opened we shift the whole
+// timeline so that the scenario's "now" equals the device's current time.
+// All logic stays in scenario time; only what the passenger sees is shifted (inside formatTime).
+let timeShiftMins = 0;
+
+export function anchorToDeviceClock(booking, date = new Date()) {
+  const deviceMin = date.getHours() * 60 + date.getMinutes();
+  const [h, m] = booking.nowTime.split(':').map(Number);
+  timeShiftMins = deviceMin - (h * 60 + m);
+}
+
+export function formatTime(hhmmScenario) {
+  const hhmm = addMinutes(hhmmScenario, timeShiftMins);
   const [h, m] = hhmm.split(':').map(Number);
   const suffix = h >= 12 ? 'PM' : 'AM';
   const h12 = h % 12 === 0 ? 12 : h % 12;

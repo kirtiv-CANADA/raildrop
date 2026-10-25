@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { calcBill } from './data';
+import { calcBill, anchorToDeviceClock } from './data';
 import { getRestaurantStatus } from './utils/rules';
 import Home from './screens/Home';
 import Journey from './screens/Journey';
@@ -203,6 +203,7 @@ export default function App() {
       <Home
         onCompare={() => setScreen('beforeafter')}
         onFound={(j) => {
+          anchorToDeviceClock(j.booking);
           setJourney(j);
           setDelayMins(j.booking.currentDelayMins);
           setCustomer({ name: j.booking.passenger, phone: j.booking.phone });

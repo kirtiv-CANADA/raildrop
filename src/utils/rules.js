@@ -1,4 +1,4 @@
-import { addMinutes, formatTime, RESTAURANT_HOURS } from '../data';
+import { addMinutes, formatTime, restaurantsAt, RESTAURANT_HOURS } from '../data';
 
 // ASSUMPTION for this prototype (not any real company's rule):
 // order-by time = train ETA - cooking time - 30 minute buffer
@@ -63,10 +63,33 @@ export function getRestaurantStatus(restaurant, stop, delayMins, nowHHMM) {
 
   return { status: 'open', eta, orderBy, minsLeft };
 }
-// Function to generate the ordering summary text
-export function getOrderingSummary(delayMins) {
-  if (delayMins > 0) {
-    return "We use the live arrival time (ETA) to adjust your order window.";
+
+// "Can I order right now?" Finds the first station on the route where at least one restaurant can deliver.
+export function getOrderingSummary(journey, delayMins) {
+  const { booking, deliverableStops } = journey;
+  for (const stop of deliverableStops) {
+    const all = restaurantsAt(stop.code);
+    const open = all
+      .map((r) => ({ r, info: getRestaurantStatus(r, stop, delayMins, booking.nowTime) }))
+      .filter((x) => x.info.status === 'open');
+    if (open.length > 0) {
+      const tightest = open.reduce((a, b) => (b.info.minsLeft < a.info.minsLeft ? b : a));
+      // What would a cutoff based on the printed timetable (no delay) say for the same restaurant?
+      const byTimetable = getRestaurantStatus(tightest.r, stop, 0, booking.nowTime);
+      return {
+        restaurantName: tightest.r.name,
+        timetableClosed: byTimetable.status !== 'open',
+        timetableOrderBy: byTimetable.orderBy,
+        timetableEta: getEta(stop, 0),
+        station: stop,
+        isBoarding: stop.code === booking.boardingCode,
+        openCount: open.length,
+        total: all.length,
+        eta: getEta(stop, delayMins),
+        orderBy: tightest.info.orderBy,
+        minsLeft: tightest.info.minsLeft,
+      };
+    }
   }
-  return "Train is on time. You can order food for upcoming stations.";
+  return null;
 }
