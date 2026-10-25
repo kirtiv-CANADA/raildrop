@@ -63,3 +63,10 @@ export function getRestaurantStatus(restaurant, stop, delayMins, nowHHMM) {
 
   return { status: 'open', eta, orderBy, minsLeft };
 }
+// Function to generate the ordering summary text
+export function getOrderingSummary(delayMins) {
+  if (delayMins > 0) {
+    return "We use the live arrival time (ETA) to adjust your order window.";
+  }
+  return "Train is on time. You can order food for upcoming stations.";
+}
