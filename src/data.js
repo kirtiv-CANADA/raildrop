@@ -79,7 +79,7 @@ export const PNRS = {
     seat: 41,
     berth: 'Lower',
     boardingCode: 'NDLS',
-    destinationCode: 'BHS',
+    destinationCode: 'BPL',
     currentDelayMins: 63,
     nowTime: '20:00',
     title: 'Main demo',

@@ -5,7 +5,7 @@ export default function Home({ onFound, onCompare }) {
   const [pnr, setPnr] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [showDemo, setShowDemo] = useState(false);
+  const [showDemo, setShowDemo] = useState(true);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -23,7 +23,7 @@ export default function Home({ onFound, onCompare }) {
       setLoading(false);
 
       if (!journey) {
-        setError("We couldn't find a booking for this PNR. Try one of the demo bookings below.");
+        setError("This is a demo with made-up data. Please pick one of the demo bookings below.");
         return;
       }
       onFound(journey);
@@ -37,6 +37,9 @@ export default function Home({ onFound, onCompare }) {
         <p className="text-gray-600 text-center mt-2">
           Order food to your train seat, even when the train is late.
         </p>
+        <p className="text-xs text-gray-500 text-center mt-2">
+          A concept feature for IRCTC eCatering: a live-arrival order window for delayed trains.
+        </p>
 
         <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mt-8">
           <label className="block text-sm font-medium text-gray-700 mb-1">PNR number</label>
@@ -49,6 +52,9 @@ export default function Home({ onFound, onCompare }) {
             placeholder="Enter your 10-digit PNR"
             className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-[#FC8019]"
           />
+          <p className="text-xs text-gray-500 mt-2">
+            Demo mode: every booking, train and restaurant here is made-up sample data. Pick a demo booking below.
+          </p>
           {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
 
           <button
@@ -104,7 +110,7 @@ export default function Home({ onFound, onCompare }) {
         </button>
 
         <p className="text-xs text-gray-400 text-center mt-6">
-          Concept prototype with sample data. Not affiliated with any railway or food delivery company.
+          Independent concept inspired by IRCTC eCatering, built with sample data. Not affiliated with or endorsed by IRCTC.
         </p>
       </div>
     </div>
