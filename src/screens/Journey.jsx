@@ -1,4 +1,11 @@
 import { addMinutes, formatTime, formatDelay } from '../data';
+import { getOrderingSummary } from '../utils/rules';
+
+const formatMins = (m) => {
+  const h = Math.floor(m / 60);
+  const r = m % 60;
+  return h ? `${h} hr ${r} min` : `${r} min`;
+};
 
 export default function Journey({ journey, delayMins, onBack, onContinue }) {
   const { booking, train, deliverableStops } = journey;
@@ -8,6 +15,7 @@ export default function Journey({ journey, delayMins, onBack, onContinue }) {
   const stops = train.stops.slice(startIdx, endIdx + 1);
   const isLate = delayMins > 0;
   const boardingStop = stops[0];
+  const summary = getOrderingSummary(journey, delayMins);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center px-4 py-6">
@@ -42,7 +50,7 @@ export default function Journey({ journey, delayMins, onBack, onContinue }) {
           </div>
 
           <p className="mt-3 text-xs text-gray-500">
-            Demo time: <span className="font-semibold text-gray-700">{formatTime(booking.nowTime)}</span>
+            Current time: <span className="font-semibold text-gray-700">{formatTime(booking.nowTime)}</span>
           </p>
 
           {isLate && (
@@ -54,6 +62,37 @@ export default function Journey({ journey, delayMins, onBack, onContinue }) {
             </div>
           )}
         </div>
+
+        {/* Can I order right now? */}
+        {summary ? (
+          <div className="bg-green-50 border border-green-200 rounded-2xl p-5 mt-4">
+            <p className="font-bold text-green-700">Yes, you can order now</p>
+            <p className="text-sm text-gray-700 mt-1">
+              {summary.openCount} of {summary.total} restaurants at <strong>{summary.station.name}</strong> can deliver
+              when your train arrives at <strong>{formatTime(summary.eta)}</strong>. Order within{' '}
+              <strong>{formatMins(summary.minsLeft)}</strong> (by {formatTime(summary.orderBy)}).
+            </p>
+            {summary.timetableClosed && delayMins > 0 && (
+              <p className="text-sm text-gray-700 mt-2 bg-white border border-green-200 rounded-lg px-3 py-2">
+                A cutoff based on the printed timetable (arrival {formatTime(summary.timetableEta)}) would already have
+                closed {summary.restaurantName} at {formatTime(summary.timetableOrderBy)}. Using the live arrival time
+                keeps it open.
+              </p>
+            )}
+            {!summary.isBoarding && (
+              <p className="text-xs text-gray-600 mt-2">
+                Nothing can deliver at your boarding station right now, so this is the earliest station that works.
+              </p>
+            )}
+          </div>
+        ) : (
+          <div className="bg-red-50 border border-red-200 rounded-2xl p-5 mt-4">
+            <p className="font-bold text-red-600">No, not right now</p>
+            <p className="text-sm text-gray-700 mt-1">
+              With the current arrival times, every restaurant on your route is closed or past its order cutoff.
+            </p>
+          </div>
+        )}
 
         {/* Where is the train */}
         <div className="bg-white rounded-2xl shadow border border-gray-100 p-5 mt-4">
