@@ -8,7 +8,7 @@ A concept prototype for the **Hack to the Future** hackathon.
 
 **Live link:** https://raildrop.vercel.app
 
-**Demo video:** PASTE YOUR YOUTUBE LINK HERE
+**Demo video:** https://youtu.be/diEmA9uKJO4
 
 ## Problem
 
