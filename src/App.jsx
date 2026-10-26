@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { calcBill, anchorToDeviceClock } from './data';
+import { calcBill, anchorToDeviceClock, getJourneyByPnr, menuFor, RESTAURANTS } from './data';
 import { getRestaurantStatus } from './utils/rules';
 import Home from './screens/Home';
 import Journey from './screens/Journey';
@@ -13,7 +13,31 @@ import Tracking from './screens/Tracking';
 import BeforeAfter from './screens/BeforeAfter';
 import DemoControls from './components/DemoControls';
 
-const DEMO_SCREENS = ['journey', 'stations', 'restaurants', 'menu', 'tracking'];
+const DEMO_SCREENS = ['home', 'journey', 'stations', 'restaurants', 'menu', 'tracking'];
+const MAIN_DEMO_PNR = '7305148296';
+
+// Ready-made states for the demo controls ("Jump to a scene").
+const SCENES = [
+  { id: 'journey', label: '1. Can I order right now?' },
+  { id: 'restaurants', label: '2. Restaurants after a delay' },
+  { id: 'tracking-moved', label: '3. Window moves after ordering' },
+  { id: 'tracking-closed', label: '4. Restaurant closes, refund' },
+  { id: 'beforeafter', label: '5. Before and after' },
+];
+
+function makeOrder(journey, station, restaurant, items, placedDelayMins) {
+  return {
+    id: 'RD' + Math.floor(100000 + Math.random() * 900000),
+    otp: String(Math.floor(1000 + Math.random() * 9000)),
+    station,
+    restaurant,
+    items,
+    bill: calcBill(items),
+    placedDelayMins,
+    coach: journey.booking.coach,
+    seat: journey.booking.seat,
+  };
+}
 
 export default function App() {
   const [screen, setScreen] = useState('home');
@@ -43,18 +67,53 @@ export default function App() {
 
   const placeOrder = (method) => {
     setPaymentMethod(method);
-    setOrder({
-      id: 'RD' + Math.floor(100000 + Math.random() * 900000),
-      otp: String(Math.floor(1000 + Math.random() * 9000)),
-      station: selectedStation,
-      restaurant: selectedRestaurant,
-      items: cart,
-      bill: calcBill(cart),
-      placedDelayMins: delayMins,
-      coach: journey.booking.coach,
-      seat: journey.booking.seat,
-    });
+    setOrder(makeOrder(journey, selectedStation, selectedRestaurant, cart, delayMins));
     setScreen('confirmed');
+  };
+
+  // Opens a ready-made state of the main demo (for the demo controls).
+  const jumpToScene = (sceneId) => {
+    if (sceneId === 'beforeafter') {
+      setScreen('beforeafter');
+      return;
+    }
+
+    const j = getJourneyByPnr(MAIN_DEMO_PNR);
+    const baseDelay = j.booking.currentDelayMins;
+    const station = j.deliverableStops[0]; // New Delhi, the boarding station
+    const restaurant = RESTAURANTS.find((r) => r.id === 'r16'); // Dilli Rasoi Kitchen
+    const menu = menuFor(restaurant);
+    const items = ['thali', 'chai']
+      .map((id) => menu.find((m) => m.id === id))
+      .filter(Boolean)
+      .map((m) => ({ ...m, qty: 1 }));
+
+    anchorToDeviceClock(j.booking);
+    setJourney(j);
+    setCustomer({ name: j.booking.passenger, phone: j.booking.phone });
+    setSelectedStation(station);
+    setSelectedRestaurant(restaurant);
+    setPaymentMethod('UPI (GPay/PhonePe)');
+    setCart([]);
+    setOrder(null);
+
+    if (sceneId === 'journey') {
+      setDelayMins(baseDelay);
+      setScreen('journey');
+    } else if (sceneId === 'restaurants') {
+      setDelayMins(baseDelay + 40);
+      setScreen('restaurants');
+    } else if (sceneId === 'tracking-moved') {
+      setCart(items);
+      setOrder(makeOrder(j, station, restaurant, items, baseDelay));
+      setDelayMins(baseDelay + 40);
+      setScreen('tracking');
+    } else if (sceneId === 'tracking-closed') {
+      setCart(items);
+      setOrder(makeOrder(j, station, restaurant, items, baseDelay));
+      setDelayMins(baseDelay + 80);
+      setScreen('tracking');
+    }
   };
 
   const resetAll = () => {
@@ -216,12 +275,17 @@ export default function App() {
   return (
     <>
       {renderScreen()}
-      {journey && DEMO_SCREENS.includes(screen) && (
+      {DEMO_SCREENS.includes(screen) && (
         <DemoControls
+          key={journey ? 'live' : 'idle'}
+          hasJourney={Boolean(journey)}
+          defaultOpen={Boolean(journey)}
           delayMins={delayMins}
-          originalDelay={journey.booking.currentDelayMins}
+          originalDelay={journey ? journey.booking.currentDelayMins : 0}
+          scenes={SCENES}
           onSimulate={() => setDelayMins((d) => d + 40)}
           onReset={() => setDelayMins(journey.booking.currentDelayMins)}
+          onScene={jumpToScene}
         />
       )}
     </>
