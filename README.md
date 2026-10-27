@@ -31,14 +31,11 @@ I was waiting at New Delhi station for a train that was running 2 to 3 hours lat
 
 **Before (today):** the order window closes and the passenger sees an empty page with no reason. In the app, choose **How is this different from ordering today?** on the home screen.
 
-![Before and after](images/05-before-and-after.png)
-
 **After (with RailDrop):**
-
-![Can I order right now?](images/01-can-i-order-now.png)
-![A closed restaurant explains why](images/02-restaurants-after-delay.png)
-![The window moves when the delay changes](images/03-tracking-window-moved.png)
-![Clear message and refund when it closes](images/04-closed-and-refund.png)
+- The app clearly answers "Can I order right now?"
+- A closed restaurant explains why it is closed.
+- The order window dynamically moves when the delay changes.
+- If the window closes, the app shows a clear message and simulates a refund.
 
 ## How it works
 
@@ -90,15 +87,8 @@ Railway food apps already know the live arrival estimate. They could calculate t
 
 ## Run locally
 
-```
+```bash
 git clone https://github.com/kirtiv-CANADA/raildrop.git
 cd raildrop
 npm install
 npm run dev
-```
-
-Open http://localhost:5173
-
-## Author
-
-Built by Kirti (solo).
